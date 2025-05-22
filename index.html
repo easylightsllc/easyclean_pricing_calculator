@@ -17,20 +17,30 @@
 
   <label for="location">Select Your Location:</label>
   <select id="location">
-    <option value="120">Contra Costa, Marin, Solano, Berkeley, Oakland, Alameda (city)</option>
-    <option value="170">San Francisco, Alameda County (rest), San Mateo, Milpitas</option>
-    <option value="195">Livermore, Santa Clara (rest), Sonoma</option>
+    <option value="120">Contra Costa County, Marin County, Solano County, the City of Berkeley, the City of Oakland, the City of Alameda</option>
+    <option value="170">City and County of San Francisco, Alameda County (except the City of Berkeley, the City of Oakland, the City of Alameda, and the City of Livermore), San Mateo County, and the City of Milpitas</option>
+    <option value="195">the City of Livermore, Santa Clara County (except the City of Milpitas), Sonoma County</option>
   </select>
 
   <div class="section">
     <h2>Window Cleaning</h2>
-    <label>1st Story Windows (Exterior Only): <input type="number" id="win1Ext" value="0"></label>
-    <label>2nd Story Windows (Exterior Only): <input type="number" id="win2Ext" value="0"></label>
-    <label>3rd Story Windows (Exterior Only): <input type="number" id="win3Ext" value="0"></label>
-    <label>1st Story Windows (Exterior + Interior): <input type="number" id="win1Both" value="0"></label>
-    <label>2nd Story Windows (Exterior + Interior): <input type="number" id="win2Both" value="0"></label>
-    <label>3rd Story Windows (Exterior + Interior): <input type="number" id="win3Both" value="0"></label>
-    <label>Interior Only Windows: <input type="number" id="winIntOnly" value="0"></label>
+    <label for="story">Select Window Story:</label>
+    <select id="story">
+      <option value="1">1st Story</option>
+      <option value="2">2nd Story</option>
+      <option value="3">3rd Story</option>
+    </select>
+
+    <label for="windowType">Select Window Cleaning Type:</label>
+    <select id="windowType">
+      <option value="Ext">Exterior Only</option>
+      <option value="Both">Exterior + Interior</option>
+      <option value="IntOnly">Interior Only</option>
+    </select>
+
+    <label for="windowCount">Number of Windows:</label>
+    <input type="number" id="windowCount" value="0">
+
     <label>Window Screens: <input type="number" id="winScreens" value="0"></label>
   </div>
 
@@ -51,6 +61,17 @@
   <script>
     function calculateTotal() {
       const base = parseFloat(document.getElementById('location').value);
+      const screenQty = parseFloat(document.getElementById('winScreens').value) || 0;
+
+      const story = document.getElementById('story').value;
+      const type = document.getElementById('windowType').value;
+      const count = parseFloat(document.getElementById('windowCount').value) || 0;
+
+      let winKey = '';
+      if (type === 'Ext') winKey = `win${story}Ext`;
+      else if (type === 'Both') winKey = `win${story}Both`;
+      else if (type === 'IntOnly') winKey = 'winIntOnly';
+
       const prices = {
         win1Ext: 11.82,
         win2Ext: 16.80,
@@ -70,10 +91,14 @@
       };
 
       let total = base;
-      for (let key in prices) {
-        const qty = parseFloat(document.getElementById(key).value) || 0;
-        total += qty * prices[key];
-      }
+      total += count * (prices[winKey] || 0);
+      total += screenQty * prices.winScreens;
+
+      const ids = ['gutter', 'cobweb', 'solar', 'house', 'drive', 'deck', 'fence'];
+      ids.forEach(id => {
+        const qty = parseFloat(document.getElementById(id).value) || 0;
+        total += qty * prices[id];
+      });
 
       document.getElementById('totalDisplay').innerText = `Total: $${total.toFixed(2)}`;
     }
